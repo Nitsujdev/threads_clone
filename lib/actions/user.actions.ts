@@ -4,13 +4,13 @@ import { connectToDB } from "@/lib/mongoose";
 import User from "@/lib/models/user.model";
 import { revalidatePath } from "next/cache";
 import Thread from "../models/thread.model";
-import { FilterQuery, model, SortOrder } from "mongoose";
+import { FilterQuery, SortOrder } from "mongoose";
 
 interface Params {
     userId: string;
     username: string;
     name: string;
-    bio: string;
+    bio: string;    
     image: string;
     path: string;
 }
@@ -24,7 +24,7 @@ export async function updateUser({
     path
 }: Params): Promise<void> {
 
-    connectToDB();
+    await connectToDB();
 
     try {
         await User.findOneAndUpdate({ id: userId }, {
@@ -48,7 +48,7 @@ export async function updateUser({
 export async function fetchUser(userId: string) {
 
     try {
-        connectToDB();
+        await connectToDB();
         return await User.findOne({ id: userId })
     } catch (error: any) {
         throw new Error(`Failed to fetch user: ${error.message}`);
@@ -57,7 +57,7 @@ export async function fetchUser(userId: string) {
 
 export async function fetchUserThreads(userId: string) {
     try {
-        connectToDB();
+        await connectToDB();
         const threads = await User.findOne({ id: userId })
         .populate({
             path: "threads",
@@ -101,7 +101,7 @@ export async function fetchUsers({
     sortBy?: SortOrder 
 }) {
     try {
-        connectToDB();
+        await connectToDB();
         const skipAmount = (pageNumber - 1) * PAGE_SIZE;
 
         const regex = new RegExp(searchString, "i");
@@ -138,7 +138,7 @@ export async function fetchUsers({
 
 export async function getActivity(userId: string) {
     try {
-        connectToDB();
+        await connectToDB();
 
         const userThreads = await Thread.find({ author: userId });
 
