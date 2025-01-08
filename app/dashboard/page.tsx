@@ -22,7 +22,6 @@ const page = async () => {
                 parentId={thread.parentId}
                 content={thread.text}
                 author={thread.author}
-                authorUsername={thread.author.username}
                 community={thread.community}
                 createdAt={thread.createdAt}
                 comments={thread.children}

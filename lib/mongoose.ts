@@ -1,19 +1,32 @@
 import mongoose from "mongoose";
 
-let isConnected = false;
+let cachedConnection: typeof mongoose | null = null;
 
 export const connectToDB = async () => {
+    if (cachedConnection) {
+        return cachedConnection;
+    }
+
     mongoose.set('strictQuery', true);
 
-    if(!process.env.MONGODB_URL) return console.log("MONGODB_URL not found");
-
-    if(isConnected) return console.log("Already connected to MongoDB");
+    if (!process.env.MONGODB_URL) {
+        throw new Error("MONGODB_URL nicht gefunden");
+    }
 
     try {
-        await mongoose.connect(process.env.MONGODB_URL);
-        isConnected = true;
-        console.log("Connected to MongoDB");
+        const conn = await mongoose.connect(process.env.MONGODB_URL, {
+            dbName: "threads",
+            bufferCommands: false,
+            connectTimeoutMS: 30000,
+            socketTimeoutMS: 30000,
+            serverSelectionTimeoutMS: 30000,
+        });
+
+        cachedConnection = conn;
+        console.log("MongoDB verbunden");
+        return conn;
     } catch (error) {
-        console.log(error);
+        console.error("MongoDB Verbindungsfehler:", error);
+        throw error;
     }
 }
