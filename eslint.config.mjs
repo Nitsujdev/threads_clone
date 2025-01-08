@@ -10,7 +10,42 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  {
+    ignores: [
+      "node_modules",
+      ".next",
+      "build",
+      "dist",
+      ".vscode",
+      ".env",
+      ".env.local",
+      ".env.development",
+      ".env.production",
+      ".env.test",
+    ],
+  },
+  ...compat.extends(
+    "next/core-web-vitals",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:tailwindcss/recommended",
+    "prettier",
+  ),
+  {
+    rules: {
+      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-explicit-any": "warn",
+      "react/prop-types": "off",
+      "react/react-in-jsx-scope": "off",
+      "tailwindcss/classnames-order": "warn",
+      "tailwindcss/no-custom-classname": "off",
+    },
+    settings: {
+      tailwindcss: {
+        callees: ["cn", "clsx", "twMerge"],
+        config: "tailwind.config.ts",
+      },
+    },
+  },
 ];
 
 export default eslintConfig;
