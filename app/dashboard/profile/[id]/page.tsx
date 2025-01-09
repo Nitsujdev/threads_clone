@@ -1,5 +1,4 @@
 import { fetchUser } from "@/lib/actions/user.actions";
-import { redirect } from "next/navigation";
 import { currentUser } from "@clerk/nextjs/server";
 import ProfileHeader from "@/components/shared/ProfileHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,7 +13,7 @@ const page = async ({ params }: { params: { id: string } }) => {
   const userInfo = await fetchUser(id);
   //  if (!userInfo?.onboarded) redirect("/onboarding");
   return (
-    <section className="mt-9 flex flex-col gap-10">
+    <section className="flex flex-col gap-10">
       <ProfileHeader
         accountId={userInfo._id}
         authUserId={user.id}
@@ -23,7 +22,7 @@ const page = async ({ params }: { params: { id: string } }) => {
         imgUrl={userInfo.image}
         bio={userInfo.bio}
       />
-      <div className="mt-9">
+      <div className="mt-4">
         <Tabs defaultValue="threads" className="w-full">
           <TabsList className="tab">
             {profileTabs.map((tab) => (
@@ -37,7 +36,7 @@ const page = async ({ params }: { params: { id: string } }) => {
                 />
                 <p className="text-dark-100 max-mobile:hidden">{tab.label}</p>
                 {tab.value === "threads" && (
-                  <p className="text-dark-100 bg-brand-green-light_100 ml-1 rounded-full px-1.5 text-sm font-medium">
+                  <p className="text-light-100 bg-brand-green-light_100 ml-1 size-5 items-center justify-center rounded-full text-sm font-medium">
                     {userInfo?.threads?.length}
                   </p>
                 )}

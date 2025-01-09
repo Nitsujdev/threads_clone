@@ -49,32 +49,46 @@ export async function createCommunity(
   }
 }
 
-export async function fetchCommunityDetails(id: string) {
+export async function fetchCommunityDetails(communityId: string) {
   try {
     await connectToDB();
 
-    const communityDetails = await Community.findOne({ id }).populate([
-      "createdBy",
+    const communityDetails = await Community.findOne({ 
+      $or: [
+        { _id: communityId },  // Versuche zuerst mit MongoDB _id
+        { id: communityId }    // Fallback auf Clerk id
+      ]
+    })
+    .populate([
+      {
+        path: "createdBy",
+        model: User,
+        select: "name username image _id id"
+      },
       {
         path: "members",
         model: User,
         select: "name username image _id id",
       },
-    ]);
+    ])
+    .lean();
 
-    return communityDetails;
+    if (!communityDetails) {
+      throw new Error(`Community nicht gefunden`);
+    }
+
+    return JSON.parse(JSON.stringify(communityDetails));
   } catch (error) {
-    // Handle any errors
-    console.error("Error fetching community details:", error);
+    console.error("Fehler beim Abrufen der Community:", error);
     throw error;
   }
 }
 
-export async function fetchCommunityPosts(id: string) {
+export async function fetchCommunityThreads(id: string) {
   try {
     await connectToDB();
 
-    const communityPosts = await Community.findById(id).populate({
+    const communityThreads = await Community.findById(id).populate({
       path: "threads",
       model: Thread,
       populate: [
@@ -95,7 +109,7 @@ export async function fetchCommunityPosts(id: string) {
       ],
     });
 
-    return communityPosts;
+    return JSON.parse(JSON.stringify(communityThreads));
   } catch (error) {
     // Handle any errors
     console.error("Error fetching community posts:", error);
@@ -147,12 +161,12 @@ export async function fetchCommunities({
     // Count the total number of communities that match the search criteria (without pagination).
     const totalCommunitiesCount = await Community.countDocuments(query);
 
-    const communities = await communitiesQuery.exec();
+    const communities = await communitiesQuery.lean();
 
     // Check if there are more communities beyond the current page.
     const isNext = totalCommunitiesCount > skipAmount + communities.length;
 
-    return { communities, isNext };
+    return JSON.parse(JSON.stringify({ communities, isNext }));
   } catch (error) {
     console.error("Error fetching communities:", error);
     throw error;

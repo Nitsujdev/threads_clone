@@ -90,7 +90,7 @@
 
   /* Community Card */
   .community-card {
-    @apply w-full rounded-lg bg-dark-200 px-4 py-5 mobile:w-96;
+    @apply w-full rounded-lg bg-light-200 px-4 py-5 mobile:w-96;
   }
 
   .community-card_btn {

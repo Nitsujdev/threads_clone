@@ -25,6 +25,8 @@ const page = async () => {
                 community={thread.community}
                 createdAt={thread.createdAt}
                 comments={thread.children}
+                isComment={thread.children.length > 0}
+                accountType="User"
               />
             ))}
           </>

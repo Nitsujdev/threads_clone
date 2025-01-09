@@ -1,8 +1,10 @@
 "use client";
 
+import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
 import Link from "next/link";
-
+import { format } from "timeago.js";
+import "timeago.js/lib/lang/de";
 interface Props {
   id: string;
   currentUserId: string;
@@ -26,6 +28,7 @@ interface Props {
     }[];
   }[];
   isComment?: boolean;
+  accountType?: string;
 }
 
 const ThreadCard = ({
@@ -38,10 +41,16 @@ const ThreadCard = ({
   createdAt,
   comments,
   isComment,
+  accountType,
 }: Props) => {
   return (
     <article
-      className={`flex w-full flex-col rounded-xl ${isComment ? "mobile:px-7 px-0" : "bg-dark-100/5 p-7"}`}
+      onClick={(e) => {
+        if (!(e.target as HTMLElement).closest("a")) {
+          window.location.href = `/dashboard/thread/${id}`;
+        }
+      }}
+      className="bg-dark-100/5 flex w-full cursor-pointer flex-col rounded-xl p-7"
     >
       <div className="flex items-start justify-between">
         <div className="flex w-full flex-1 flex-row gap-4">
@@ -69,7 +78,7 @@ const ThreadCard = ({
             <Link href={`/dashboard/thread/${id}`}>
               <p className="text-dark-100 text-base">{content}</p>
             </Link>
-            <div className={`mt-3 flex flex-col gap-3 ${isComment && "mb-10"}`}>
+            <div className={`mt-3 flex flex-col gap-3`}>
               <div className="flex flex-row gap-3.5">
                 <Image
                   src="/icons/heart-gray.svg"
@@ -102,17 +111,52 @@ const ThreadCard = ({
                   className="cursor-pointer object-contain"
                 />
               </div>
-              {isComment && comments.length > 0 && (
-                <Link href={`/thread/${id}`}>
-                  <p className="text-foreground mt-1 text-sm">
-                    {comments.length} replies
-                  </p>
-                </Link>
-              )}
+              <div className="text-foreground flex flex-row items-center gap-2 text-sm">
+                <span>{format(createdAt, "de")}</span>
+                {accountType === "User" && community && (
+                  <>
+                    <Separator
+                      orientation="vertical"
+                      className="h-full bg-neutral-800"
+                    />
+                    <Link
+                      href={`/dashboard/communities/${community._id}`}
+                      className="flex flex-row items-center"
+                    >
+                      <span>{community.name} Community</span>
+
+                      <Image
+                        src={community.image}
+                        alt={community.name}
+                        width={14}
+                        height={14}
+                        className="ml-1 rounded-full object-cover"
+                      />
+                    </Link>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
+      {comments.length > 0 && (
+        <div className="mt-3 flex flex-row items-center">
+          {comments.map((comment, index) => (
+            <Image
+              key={index}
+              src={comment.author.image}
+              alt={`user_${index}`}
+              width={24}
+              height={24}
+              className={`${index !== 0 && "-ml-3"} size-8 rounded-full object-cover`}
+            />
+          ))}
+          <p className="text-dark-100 ml-2 text-sm font-semibold">
+            {comments.length} {comments.length === 1 ? "Comment" : "Comments"}
+          </p>
+        </div>
+      )}
     </article>
   );
 };
